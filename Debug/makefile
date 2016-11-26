@@ -44,7 +44,7 @@ all: IoTAlarm
 IoTAlarm: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross G++ Linker'
-	g++  -o "IoTAlarm" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L/Users/bensen/Documents/workspaceCPP/IoTAlarm/paho-mqtt-c/lib -o "IoTAlarm" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

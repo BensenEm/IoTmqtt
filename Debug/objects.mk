@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS :=
+LIBS := -lpaho-mqtt3a -lpaho-mqtt3as -lpaho-mqtt3cs -lpaho-mqtt3c
 
