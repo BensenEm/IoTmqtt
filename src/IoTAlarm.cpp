@@ -16,8 +16,8 @@
 #define SUBCLIENT    "SubCoord"
 #define QOS         1
 #define TIMEOUT     10000L
-#define USER		"snfdsmlk"
-#define PW			"iK32pQD1FXDA"
+//#define USER		"snfdsmlk"				//USER & PW for m21.cloudmqtt.com:12765
+//#define PW		"iK32pQD1FXDA"
 #define ADDRESS     "pascal-stuedlein.de:62454"
 
 //Datatype-Struct passed to MQTTHandler consisting of a topic String and a message String
@@ -78,8 +78,8 @@
 		MQTTClient_create(&client, ADDRESS, SUBCLIENT, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 		conn_opts.keepAliveInterval = 20;
 		conn_opts.cleansession = 1;
-		conn_opts.username = USER;
-		conn_opts.password = PW;
+//		conn_opts.username = USER;
+//		conn_opts.password = PW;
 
 
 		MQTTClient_setCallbacks(client, NULL, connlost, msgarrvd, delivered);
@@ -158,32 +158,32 @@
 
 
 	int main() {
-		//start subscribers by passing topic and a identifier
-	//	MQTTClient aSubClient= initSubscriber( (char*)"t1", (char*) "s1" );
+//start subscriber by passing topic and an identifier
 		subClient= initSubscriber( (char*)"#", (char*) "s2" );
+//start publisher by passing an identifier
 		pubClient= initPublisher( (char*) "p1" );
 
+//create Packages (stringTopic and stringMessage) and push them in the outQueue for testing purposes
 		MqttPckg a("t1", "mess1");
 		MqttPckg b("t2", "mess2");
 		MqttPckg c("t3", "m3ess");
 		outQueue.push(a);
 		outQueue.push(b);
 		outQueue.push(c);
-	//
 
-		//publishing
+//publishing Whatever is in the outQueue
 		publishQueue();
-	//	publish(c);
 
-		//let everything run until pressed 'Q' or 'q'
+//let Program run until pressed 'Q' or 'q'
 		int ch;
 		do{
 			ch = getchar();
 		} while (ch!='Q' && ch != 'q');
 
-		//print Messages arrived and close Subscriber
+//print Messages arrived and close Subscriber
 		printQueue();
-	//	disconnectDestroy(aSubClient);
+
+		//	disconnectDestroy(aSubClient);
 		disconnectDestroy(subClient);
 		disconnectDestroy(pubClient);
 	}

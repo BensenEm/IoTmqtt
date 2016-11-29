@@ -4,13 +4,13 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/IoTAlarm.cpp 
+../src/MqttHandler.cpp 
 
 OBJS += \
-./src/IoTAlarm.o 
+./src/MqttHandler.o 
 
 CPP_DEPS += \
-./src/IoTAlarm.d 
+./src/MqttHandler.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
