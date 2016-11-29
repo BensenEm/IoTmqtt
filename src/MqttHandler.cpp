@@ -45,10 +45,16 @@ void connlost(void *context, char *cause){
 	disconnectDestroy(subClient);
 	disconnectDestroy(pubClient);
 	while(i<10){
-	//	nanosleep(100);
-		i++;
-		subClient= initSubscriber( (char*)"#", (char*) "s2" );
-		pubClient= initPublisher( (char*) "p1" );
+		//	nanosleep(100);
+			i++;
+		try{
+			subClient= initSubscriber( (char*)"#", (char*) "s2" );
+			pubClient= initPublisher( (char*) "p1" );
+			break;
+		}
+		catch(int e){
+			printf("%d",e);
+		}
 	}
 
 }
@@ -68,7 +74,7 @@ MQTTClient initSubscriber(char* topic, char* subClient){
 	if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
 	{
 		printf("Failed to connect, return code %d\n", rc);
-		exit(-1);
+		throw(-1);
 	}
 	printf("Subscribing to topic %s\nfor client %s using QoS%d\n\n"
 			"Press Q<Enter> to quit\n\n", topic, SUBCLIENT, QOS);
@@ -90,7 +96,7 @@ MQTTClient initPublisher(char* pubClient){
 	if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
 	{
 		printf("Failed to connect, return code %d\n", rc);
-		exit(-1);
+		throw(-1);
 	}
 	return client;
 }
@@ -127,6 +133,21 @@ void publishOutQueue(){
 		publish(outQueue.front());
 		outQueue.pop();
 	}
+}
+MqttPckg buildMqttPckg(int mPckgType, int type, int mac, int id, std::string payload ){
+	MqttPckg pckg;
+
+	switch (mPckgType){
+	//actual
+	case (1): break;
+	//history
+	case (2): break;
+	//battery:
+	case (3): break;
+	//case (4): break;
+
+	}
+	return pckg;
 }
 
 int main (){
