@@ -18,6 +18,35 @@ MqttHandler::~MqttHandler() {
 	// TODO Auto-generated destructor stub
 }
 
+int getOutId(std::string macNId){
+	for (std::vector<IdResolver>::iterator it = idTable.begin() ; it != idTable.end(); ++it){
+		if (it->coorId == macNId)
+			return it->endId;
+	}
+	return -99;
+}
+
+std::string getMacAndInId(int endId){
+	for (std::vector<IdResolver>::iterator it = idTable.begin() ; it != idTable.end(); ++it){
+		if (it->endId == endId)
+			return it->coorId;
+		}
+	return "none";
+}
+
+void addIdEntry(std::string type, std::string coorId){
+	int index= idTable.size();
+	IdResolver n (index, type, coorId);
+	idTable.push_back(n);
+}
+
+void printIdTable(){
+	std::cout<<"Sensor ID Resolver: EndID = ID for Enddevices. CoorID = ID for Coordinator."<<std::endl;
+	for (std::vector<IdResolver>::iterator it = idTable.begin() ; it != idTable.end(); ++it){
+		std::cout<<"EndID:..."<<it->endId<<"   CoorID..."<<it->coorId<<"   Type:..."<<it->type<<std::endl;
+	}
+}
+
 
 void delivered(void *context, MQTTClient_deliveryToken dt){
 	printf("Message with token value %d delivery confirmed\n", dt);
@@ -155,7 +184,10 @@ int main (){
 			subClient= initSubscriber( (char*)"#", (char*) "s2" );
 	//start publisher by passing an identifier
 			pubClient= initPublisher( (char*) "p1" );
-
+	//define Ids in IdResolver
+			idTable.push_back(IdResolver(0, "temp", "mac2784728"));
+			idTable.push_back(IdResolver(1, "temp", "mac4728"));
+			printIdqTable();
 	//create Packages (stringTopic and stringMessage) and push them in the outQueue for testing purposes
 			MqttPckg a("t1", "m1");
 			MqttPckg b("t2", "m2");

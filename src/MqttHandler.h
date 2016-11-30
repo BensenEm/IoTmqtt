@@ -13,6 +13,7 @@
 #include "string.h"
 #include <iostream>
 #include <queue>
+#include <vector>
 #include "MQTTClient.h"
 #define PUBCLIENT    "PubCoord"
 #define SUBCLIENT    "SubCoord"
@@ -33,6 +34,26 @@ struct MqttPckg{
 		mssg=m;
 	}
 };
+
+//Datatype for IDs
+struct IdResolver{
+	int endId;
+	std::string type;
+	std::string coorId;
+	IdResolver(){
+		endId= -1; type="none"; coorId="none";
+	}
+	IdResolver(int oI, std::string t, std::string mI){
+		endId= oI; type=t; coorId=mI;
+	}
+
+};
+
+//Vector ID-Table and Functions
+	std::vector<IdResolver> idTable;
+	int getOutId(std::string coorId);
+	std::string getMacAndInId(std::string endId);
+	void addIdEntry(std::string type, std::string coorId);
 
 
 //Queues handling incoming data, and outgoing data
@@ -67,21 +88,25 @@ struct MqttPckg{
 //to the only publisher in this application
 	void publish(MqttPckg p);
 
+//Publishes everything within the outQueue
 	void publishOutQueue();
 
-struct MqttController{
-	inline void operator()(){
-		//start subscriber by passing topic and an identifier
-		subClient= initSubscriber( (char*)"#", (char*) "s2" );
-		//start publisher by passing an identifier
-		pubClient= initPublisher( (char*) "p1" );
-		while(true){
-			publishOutQueue();
-		}
-		disconnectDestroy(subClient);
-		disconnectDestroy(pubClient);
+//Builds a Package ready for publishing from a set of Values
+	MqttPckg buildMqttPckg(int mPckgType, int type, int mac, int id, std::string payload );
+
+
+inline void operator()(){
+	//start subscriber by passing topic and an identifier
+	subClient= initSubscriber( (char*)"#", (char*) "s2" );
+	//start publisher by passing an identifier
+	pubClient= initPublisher( (char*) "p1" );
+	while(true){
+		publishOutQueue();
 	}
-};
+	disconnectDestroy(subClient);
+	disconnectDestroy(pubClient);
+}
+
 
 class MqttHandler {
 public:
