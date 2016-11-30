@@ -6,6 +6,7 @@
  */
 
 #include "MqttHandler.h"
+#include <stdexcept>
 #include <string>
 #include <queue>
 
@@ -18,15 +19,21 @@ MqttHandler::~MqttHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-int getOutId(std::string macNId){
+int getEndId(std::string macNId){
 	for (std::vector<IdResolver>::iterator it = idTable.begin() ; it != idTable.end(); ++it){
 		if (it->coorId == macNId)
 			return it->endId;
 	}
 	return -99;
 }
-
-std::string getMacAndInId(int endId){
+std::string getType(std::string macNId){
+	for (std::vector<IdResolver>::iterator it = idTable.begin() ; it != idTable.end(); ++it){
+		if (it->coorId == macNId)
+			return it->type;
+	}
+	return "unknowm";
+}
+std::string getCoorId(int endId){
 	for (std::vector<IdResolver>::iterator it = idTable.begin() ; it != idTable.end(); ++it){
 		if (it->endId == endId)
 			return it->coorId;
@@ -36,15 +43,32 @@ std::string getMacAndInId(int endId){
 
 void addIdEntry(std::string type, std::string coorId){
 	int index= idTable.size();
-	IdResolver n (index, type, coorId);
-	idTable.push_back(n);
-}
+	try{
+		IdResolver n (idTable.at(index-1).endId+1, type, coorId);
+		idTable.push_back(n);
+	}
+	catch(std::out_of_range& e){
+		IdResolver n (1, type, coorId);
+		idTable.push_back(n);
 
+	}
+}
+int removeIdEntry(std::string coorId){
+	for (std::vector<IdResolver>::iterator it = idTable.begin() ; it != idTable.end(); ++it){
+		if(it->coorId==coorId){
+			idTable.erase(it);
+			return 1;
+		}
+	}
+	return -1;
+}
 void printIdTable(){
-	std::cout<<"Sensor ID Resolver: EndID = ID for Enddevices. CoorID = ID for Coordinator."<<std::endl;
+
+	std::cout<<"========================================\nSensor ID Resolver: \nEndID: ID for Enddevices. \nCoorID = ID for Coordinator.\n------------------------------"<<std::endl;
 	for (std::vector<IdResolver>::iterator it = idTable.begin() ; it != idTable.end(); ++it){
 		std::cout<<"EndID:..."<<it->endId<<"   CoorID..."<<it->coorId<<"   Type:..."<<it->type<<std::endl;
 	}
+	std::cout<<"========================================"<<std::endl;
 }
 
 
@@ -163,18 +187,66 @@ void publishOutQueue(){
 		outQueue.pop();
 	}
 }
-MqttPckg buildMqttPckg(int mPckgType, int type, int mac, int id, std::string payload ){
+
+/*
+ * @param methodType: 1(actual), 2(history), 3(battery), 4(alarm)
+ * @param sensorType: unused Needed so far
+ * @param coorId: keyId on Coordinator Side
+ * @param *payload: Pointer to Vector of DataValues. With most recent value at front!
+ *
+ */
+
+//MqttPckg buildMqttPckg(int mPckgType, int type, int mac, int id, std::string payload ){
+MqttPckg buildMqttPckg(int methodType, int sensortype, std::string coorId, std::vector<std::string> * payload ){
 	MqttPckg pckg;
-
-	switch (mPckgType){
+	int endId= getEndId(coorId);
+	std::string type= getType(coorId);
+	auto prepareTopic = [&]() {
+		pckg.topic="/response/";
+		switch(methodType){
+		case(1):
+			pckg.topic+="actual/:";
+			break;
+		case(2):
+			pckg.topic+="history/:";
+			break;
+		case(3):
+			pckg.topic+="battery/:";
+			break;
+		case(4):
+			pckg.topic+="alarm/:";
+		default:
+			break;
+		}
+		pckg.topic+=std::to_string(endId);
+		pckg.topic+="/:";
+		pckg.topic+= type;
+		pckg.topic+="/";
+	};
+	switch (methodType){
 	//actual
-	case (1): break;
+	case (1):
+		prepareTopic();
+		pckg.mssg=payload->front();
+		break;
 	//history
-	case (2): break;
+	case (2):
+		prepareTopic();
+		for (std::vector<std::string>::iterator it = payload->begin() ; it != payload->end(); ++it){
+			pckg.mssg+=*it;
+			pckg.mssg+="|";
+		}
+		break;
 	//battery:
-	case (3): break;
-	//case (4): break;
-
+	case (3):
+		prepareTopic();
+		pckg.mssg=payload->front();
+		break;
+	//alarm:
+	case (4):
+		prepareTopic();
+		pckg.mssg="ALARM";
+		break;
 	}
 	return pckg;
 }
@@ -185,9 +257,21 @@ int main (){
 	//start publisher by passing an identifier
 			pubClient= initPublisher( (char*) "p1" );
 	//define Ids in IdResolver
-			idTable.push_back(IdResolver(0, "temp", "mac2784728"));
-			idTable.push_back(IdResolver(1, "temp", "mac4728"));
-			printIdqTable();
+//			idTable.push_back(IdResolver(0, "temp", "mac2784728"));
+//			idTable.push_back(IdResolver(1, "temp", "mac4728345"));
+			addIdEntry("temp", "mac3255");
+			addIdEntry("humid", "mac3345");
+			addIdEntry("accel", "mac3245");
+			addIdEntry("cam", "mac3243");
+			printIdTable();
+			removeIdEntry("mac3245");
+			addIdEntry("newKid", "mac5643");
+			printIdTable();
+			std::vector<std::string> *dataHistory= new std::vector<std::string>;
+			dataHistory->push_back("valOne");
+			dataHistory->push_back("valTwo");
+			dataHistory->push_back("valThree");
+
 	//create Packages (stringTopic and stringMessage) and push them in the outQueue for testing purposes
 			MqttPckg a("t1", "m1");
 			MqttPckg b("t2", "m2");
@@ -195,6 +279,8 @@ int main (){
 			outQueue.push(a);
 			outQueue.push(b);
 			outQueue.push(c);
+			outQueue.push(buildMqttPckg(4,33,"mac5643", dataHistory));
+
 
 	//publishing Whatever is in the outQueue
 			publishOutQueue();

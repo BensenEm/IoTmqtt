@@ -40,6 +40,8 @@ struct IdResolver{
 	int endId;
 	std::string type;
 	std::string coorId;
+//	std::string macId;
+//	int moduleId;
 	IdResolver(){
 		endId= -1; type="none"; coorId="none";
 	}
@@ -51,9 +53,13 @@ struct IdResolver{
 
 //Vector ID-Table and Functions
 	std::vector<IdResolver> idTable;
-	int getOutId(std::string coorId);
-	std::string getMacAndInId(std::string endId);
+//Translates the Id on Coordinator Side into the Id on Enddevice Side
+	int getEndId(std::string coorId);
+	std::string getCoorId(std::string endId);
+	std::string getType(std::string coorId);
 	void addIdEntry(std::string type, std::string coorId);
+	int removeIdEntry(std::string coorId);
+
 
 
 //Queues handling incoming data, and outgoing data
@@ -95,17 +101,17 @@ struct IdResolver{
 	MqttPckg buildMqttPckg(int mPckgType, int type, int mac, int id, std::string payload );
 
 
-inline void operator()(){
-	//start subscriber by passing topic and an identifier
-	subClient= initSubscriber( (char*)"#", (char*) "s2" );
-	//start publisher by passing an identifier
-	pubClient= initPublisher( (char*) "p1" );
-	while(true){
-		publishOutQueue();
-	}
-	disconnectDestroy(subClient);
-	disconnectDestroy(pubClient);
-}
+//inline void operator()(){
+//	//start subscriber by passing topic and an identifier
+//	subClient= initSubscriber( (char*)"#", (char*) "s2" );
+//	//start publisher by passing an identifier
+//	pubClient= initPublisher( (char*) "p1" );
+//	while(true){
+//		publishOutQueue();
+//	}
+//	disconnectDestroy(subClient);
+//	disconnectDestroy(pubClient);
+//}
 
 
 class MqttHandler {
