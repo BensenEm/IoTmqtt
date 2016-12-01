@@ -64,7 +64,7 @@ int removeIdEntry(std::string coorId){
 }
 void printIdTable(){
 
-	std::cout<<"========================================\nSensor ID Resolver: \nEndID: ID for Enddevices. \nCoorID = ID for Coordinator.\n------------------------------"<<std::endl;
+	std::cout<<"========================================\nSensor ID Resolver: \nEndID: ID for Enddevices. \nCoorID: ID for Coordinator.\n------------------------------"<<std::endl;
 	for (std::vector<IdResolver>::iterator it = idTable.begin() ; it != idTable.end(); ++it){
 		std::cout<<"EndID:..."<<it->endId<<"   CoorID..."<<it->coorId<<"   Type:..."<<it->type<<std::endl;
 	}
