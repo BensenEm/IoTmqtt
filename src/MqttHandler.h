@@ -101,17 +101,17 @@ struct IdResolver{
 	MqttPckg buildMqttPckg(int mPckgType, int type, int mac, int id, std::string payload );
 
 
-//inline void operator()(){
-//	//start subscriber by passing topic and an identifier
-//	subClient= initSubscriber( (char*)"#", (char*) "s2" );
-//	//start publisher by passing an identifier
-//	pubClient= initPublisher( (char*) "p1" );
-//	while(true){
-//		publishOutQueue();
-//	}
-//	disconnectDestroy(subClient);
-//	disconnectDestroy(pubClient);
-//}
+inline void operator()(){
+	//start subscriber by passing topic and an identifier
+	subClient= initSubscriber( (char*)"#", (char*) "s2" );
+	//start publisher by passing an identifier
+	pubClient= initPublisher( (char*) "p1" );
+	while(true){
+		publishOutQueue();
+	}
+	disconnectDestroy(subClient);
+	disconnectDestroy(pubClient);
+}
 
 
 class MqttHandler {
